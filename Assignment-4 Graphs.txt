@@ -1,0 +1,139 @@
+from collections import defaultdict
+
+class Graph:
+    def __init__(self):
+        self.graph = defaultdict(list)
+
+# 1. Breadth First Traversal for a Graph
+    def bfs(self, start):
+        visited = set()
+        queue = [start]
+        result = []
+        while queue:
+            vertex = queue.pop(0)
+            if vertex not in visited:
+                result.append(vertex)
+                visited.add(vertex)
+                queue.extend([neighbor for neighbor in self.graph[vertex] if neighbor not in visited])
+        return result
+
+# 2. Depth First Traversal for a Graph
+    def dfs(self, start):
+        visited = set()
+        result = []
+        self._dfs_recursive(start, visited, result)
+        return result
+
+    def _dfs_recursive(self, vertex, visited, result):
+        visited.add(vertex)
+        result.append(vertex)
+        for neighbor in self.graph[vertex]:
+            if neighbor not in visited:
+                self._dfs_recursive(neighbor, visited, result)
+
+# 3. Count the number of nodes at given level in a tree using BFS
+    def count_nodes_at_level(self, start, level):
+        visited = set()
+        queue = [(start, 0)]
+        count = 0
+        while queue:
+            vertex, current_level = queue.pop(0)
+            if current_level == level:
+                count += 1
+            if current_level < level:
+                visited.add(vertex)
+                queue.extend((neighbor, current_level + 1) for neighbor in self.graph[vertex] if neighbor not in visited)
+        return count
+
+# 4. Count number of trees in a forest
+    def count_trees_in_forest(self):
+        visited = set()
+        num_trees = 0
+        for vertex in self.graph:
+            if vertex not in visited:
+                self._dfs_recursive_count_trees(vertex, visited)
+                num_trees += 1
+        return num_trees
+
+    def _dfs_recursive_count_trees(self, vertex, visited):
+        visited.add(vertex)
+        for neighbor in self.graph[vertex]:
+            if neighbor not in visited:
+                self._dfs_recursive_count_trees(neighbor, visited)
+
+# 5. Detect Cycle in a Directed Graph
+    def has_cycle(self):
+        visited = set()
+        stack = set()
+        for vertex in self.graph:
+            if vertex not in visited:
+                if self._has_cycle_recursive(vertex, visited, stack):
+                    return True
+        return False
+
+    def _has_cycle_recursive(self, vertex, visited, stack):
+        visited.add(vertex)
+        stack.add(vertex)
+        for neighbor in self.graph[vertex]:
+            if neighbor not in visited:
+                if self._has_cycle_recursive(neighbor, visited, stack):
+                    return True
+            elif neighbor in stack:
+                return True
+        stack.remove(vertex)
+        return False
+
+# Example usage for a directed graph:
+g = Graph()
+g.graph = {
+    0: [1, 2],
+    1: [2],
+    2: [0, 3],
+    3: [3]
+}
+
+print("BFS Traversal:", g.bfs(2))
+print("DFS Traversal:", g.dfs(2))
+print("Has Cycle:", g.has_cycle())
+
+# Now, let's move on to the n-Queen's Problem.
+**Implement n-Queen’s Problem
+class NQueens:
+    def __init__(self, n):
+        self.n = n
+        self.board = [[0 for _ in range(n)] for _ in range(n)]
+        self.solutions = []
+
+    def solve(self):
+        self._solve(0)
+        return self.solutions
+
+    def _solve(self, col):
+        if col == self.n:
+            self.solutions.append(["".join(["Q" if cell == 1 else "." for cell in row]) for row in self.board])
+            return
+        for row in range(self.n):
+            if self.is_safe(row, col):
+                self.board[row][col] = 1
+                self._solve(col + 1)
+                self.board[row][col] = 0
+
+    def is_safe(self, row, col):
+        for i in range(col):
+            if self.board[row][i] == 1:
+                return False
+            if row - i >= 0 and self.board[row - i][col - i] == 1:
+                return False
+            if row + i < self.n and self.board[row + i][col - i] == 1:
+                return False
+        return True
+
+# Example usage for N-Queens problem with n = 4
+n_queens = NQueens(4)
+solutions = n_queens.solve()
+for i, solution in enumerate(solutions):
+    print(f"Solution {i + 1}:")
+    for row in solution:
+        print(row)
+    print()
+
